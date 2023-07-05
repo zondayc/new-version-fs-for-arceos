@@ -112,7 +112,7 @@ impl OpenOptions {
 }
 
 impl File {
-    fn _open_at(dir: Option<&VfsNodeRef>, path: &str, opts: &OpenOptions) -> AxResult<Self> {
+    fn _open_at(dir: Option<&VfsNodeRef>, path: &str, opts: &OpenOptions) -> AxResult<Self> {//dir is none
         debug!("open file: {} {:?}", path, opts);
         if !opts.is_valid() {
             return ax_err!(InvalidInput);
@@ -129,7 +129,10 @@ impl File {
                     node
                 }
                 // not exists, create new
-                Err(VfsError::NotFound) => crate::root::create_file(dir, path)?,
+                Err(VfsError::NotFound) => {
+                    info!("begin create file");
+                    crate::root::create_file(dir, path)?
+                },
                 Err(e) => return Err(e),
             }
         } else {
@@ -178,6 +181,7 @@ impl File {
     pub fn read(&mut self, buf: &mut [u8]) -> AxResult<usize> {
         let node = self.node.access(Cap::READ)?;
         let read_len = node.read_at(self.offset, buf)?;
+        debug!("read len is {}",read_len);
         self.offset += read_len as u64;
         Ok(read_len)
     }
@@ -225,6 +229,7 @@ impl File {
 
 impl Directory {
     fn _open_dir_at(dir: Option<&VfsNodeRef>, path: &str, opts: &OpenOptions) -> AxResult<Self> {
+        //dir is None
         debug!("open dir: {}", path);
         if !opts.read {
             return ax_err!(InvalidInput);

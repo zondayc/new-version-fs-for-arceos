@@ -34,6 +34,7 @@ extern crate alloc;
 mod dev;
 mod fs;
 mod root;
+mod sleeplock_shim;
 
 pub mod api;
 pub mod fops;
@@ -46,7 +47,7 @@ cfg_if::cfg_if! {
     }
 }
 
-use driver_block::BaseDriverOps;
+use driver_block::{BaseDriverOps, BlockDriverOps};
 
 /// Initializes filesystems by the given block device.
 ///
@@ -59,6 +60,8 @@ pub fn init_filesystems(blk_dev: BlockDevice) {
     info!("Initialize filesystems...");
     info!("  use block device: {:?}", blk_dev.device_name());
 
-    let disk = self::dev::Disk::new(blk_dev);
-    self::root::init_rootfs(disk);
+    //let disk = self::dev::Disk::new(blk_dev);
+    //self::root::init_rootfs(disk);
+    self::root::init_rootfs_by_blk_dev(blk_dev);
+    
 }

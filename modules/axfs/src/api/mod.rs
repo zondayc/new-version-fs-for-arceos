@@ -34,6 +34,7 @@ pub fn set_current_dir(path: &str) -> io::Result<()> {
 pub fn read(path: &str) -> io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let size = file.metadata().map(|m| m.len()).unwrap_or(0);
+    info!("read size is {}",size);
     let mut bytes = Vec::with_capacity(size as usize);
     file.read_to_end(&mut bytes)?;
     Ok(bytes)

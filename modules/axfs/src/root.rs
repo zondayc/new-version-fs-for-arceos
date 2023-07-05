@@ -7,8 +7,9 @@ use axerrno::{ax_err, AxError, AxResult};
 use axfs_vfs::{VfsNodeAttr, VfsNodeOps, VfsNodeRef, VfsNodeType, VfsOps, VfsResult};
 use axsync::Mutex;
 use lazy_init::LazyInit;
+use crate::BlockDevice;
 
-use crate::{api::FileType, fs};
+use crate::{api::FileType, fs::{self, axxv6fs}};
 
 static CURRENT_DIR_PATH: Mutex<String> = Mutex::new(String::new());
 static CURRENT_DIR: LazyInit<Mutex<VfsNodeRef>> = LazyInit::new();
@@ -176,7 +177,16 @@ pub(crate) fn init_rootfs(disk: crate::dev::Disk) {
     *CURRENT_DIR_PATH.lock() = "/".into();
 }
 
-fn parent_node_of(dir: Option<&VfsNodeRef>, path: &str) -> VfsNodeRef {
+pub(crate) fn init_rootfs_by_blk_dev(blk_dev:BlockDevice) {//?这一段内容也需要检查一下
+    let mut xfs=fs::axxv6fs::Xv6FileSystem::new();
+    xfs.init(blk_dev);
+    let root_dir=RootDirectory::new(Arc::new(xfs));
+    ROOT_DIR.init_by(Arc::new(root_dir));
+    CURRENT_DIR.init_by(Mutex::new(ROOT_DIR.clone()));
+    *CURRENT_DIR_PATH.lock() = "/".into();
+}
+
+fn parent_node_of(dir: Option<&VfsNodeRef>, path: &str) -> VfsNodeRef {//合着这里就只是判断是相对路径还是绝对路径？
     if path.starts_with('/') {
         ROOT_DIR.clone()
     } else {
@@ -194,6 +204,7 @@ pub(crate) fn absolute_path(path: &str) -> AxResult<String> {
 }
 
 pub(crate) fn lookup(dir: Option<&VfsNodeRef>, path: &str) -> AxResult<VfsNodeRef> {
+    info!("axfs root: lookup path is {}",path);
     if path.is_empty() {
         return ax_err!(NotFound);
     }
@@ -216,10 +227,17 @@ pub(crate) fn create_file(dir: Option<&VfsNodeRef>, path: &str) -> AxResult<VfsN
     parent.lookup(path)
 }
 
-pub(crate) fn create_dir(dir: Option<&VfsNodeRef>, path: &str) -> AxResult {
+pub(crate) fn create_dir(dir: Option<&VfsNodeRef>, path: &str) -> AxResult {//dir is None
+    info!("create dir: path is {:?}",path);
     match lookup(dir, path) {
-        Ok(_) => ax_err!(AlreadyExists),
-        Err(AxError::NotFound) => parent_node_of(dir, path).create(path, VfsNodeType::Dir),
+        Ok(_) => {
+            info!("end look up!");
+            ax_err!(AlreadyExists)
+        },
+        Err(AxError::NotFound) => {
+            info!("create dir: not found!");
+            parent_node_of(dir, path).create(path, VfsNodeType::Dir)
+        },
         Err(e) => Err(e),
     }
 }
@@ -236,7 +254,7 @@ pub(crate) fn remove_file(dir: Option<&VfsNodeRef>, path: &str) -> AxResult {
     }
 }
 
-pub(crate) fn remove_dir(dir: Option<&VfsNodeRef>, path: &str) -> AxResult {
+pub(crate) fn remove_dir(dir: Option<&VfsNodeRef>, path: &str) -> AxResult {//dir is none
     if path.is_empty() {
         return ax_err!(NotFound);
     }
