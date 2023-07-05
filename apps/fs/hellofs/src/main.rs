@@ -1,8 +1,6 @@
 #![no_std]
 #![no_main]
 
-use libax::string::String;
-
 #[macro_use]
 extern crate libax;
 

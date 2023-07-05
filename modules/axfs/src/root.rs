@@ -9,7 +9,7 @@ use axsync::Mutex;
 use lazy_init::LazyInit;
 use crate::BlockDevice;
 
-use crate::{api::FileType, fs::{self, axxv6fs}};
+use crate::{api::FileType, fs::{self}};
 
 static CURRENT_DIR_PATH: Mutex<String> = Mutex::new(String::new());
 static CURRENT_DIR: LazyInit<Mutex<VfsNodeRef>> = LazyInit::new();

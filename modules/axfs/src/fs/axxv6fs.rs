@@ -1,10 +1,8 @@
-use crate::dev::Disk;
 use crate::sleeplock_shim::FsLockList;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use axfs_vfs::VfsOps;
 use axfs_xv6fs::dir::DirNode;
-use axfs_xv6fs::file::FileNode;
 use driver_block::BlockDriverOps;
 use crate::BlockDevice as axdevice;
 
@@ -37,11 +35,11 @@ pub struct DiskOps;
 
 impl BlockDevice for DiskOps {
     fn read_block(&self, _block_id: usize, _buf: &mut [u8]) {
-        BLOCK_DEV.lock().read_block(_block_id as u64, _buf);
+        let _=BLOCK_DEV.lock().read_block(_block_id as u64, _buf);
     }
 
     fn write_block(&self, _block_id: usize, _buf: &[u8]) {
-        BLOCK_DEV.lock().write_block(_block_id as u64, _buf);
+        let _=BLOCK_DEV.lock().write_block(_block_id as u64, _buf);
     }
 }
 
@@ -56,7 +54,6 @@ impl Xv6FileSystem{
         info!("init block device");
         init_block_dev(blk_dev);
         info!("init xv6fs");
-        let xfs=Arc::new(Xv6FileSystem::new());
         unsafe{xv6fs::init(Arc::new(DiskOps), 0);}
     }
 }
