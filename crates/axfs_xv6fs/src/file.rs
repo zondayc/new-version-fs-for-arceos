@@ -23,7 +23,7 @@ impl VfsNodeOps for FileNode {
     }
 
     fn write_at(&self, offset: u64, buf: &[u8]) -> VfsResult<usize> {
-        VfsResult::Ok(self.filenode.vfile_write(buf.as_ptr() as usize,buf.len()).unwrap())
+        VfsResult::Ok(self.filenode.vfile_write(offset as u32,buf.as_ptr() as usize,buf.len()).unwrap())
     }
 
     impl_vfs_non_dir_default! {}

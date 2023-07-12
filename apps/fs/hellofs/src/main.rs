@@ -18,6 +18,8 @@ fn main(){
     let res=libax::fs::read("/testfile");
     let buf=res.as_ref().unwrap();
     println!("{:?}",buf);
+    let res=libax::fs::write("/testfile2", "let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!let me see who doesn't play the Arknight!!!");
+    let res=libax::fs::remove_file("/testfile2");
     let res=libax::fs::remove_file("/testfile1");
     let res=libax::fs::remove_file("/testfile");
 }

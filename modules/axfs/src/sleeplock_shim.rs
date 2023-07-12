@@ -1,7 +1,6 @@
-use core::{sync::atomic::{AtomicBool,Ordering}, str};
+use core::{sync::atomic::{AtomicBool,Ordering}};
 use alloc::vec::Vec;
 use axtask::WaitQueue;
-use lazy_init::LazyInit;
 
 pub struct FsLockManager{
     wq:WaitQueue,
@@ -36,9 +35,5 @@ impl FsLockList {
         self.lock_list.push(lock);
         //info!("push!");
         index
-    }
-
-    pub fn new()->Self{
-        Self { lock_list: Vec::new() }
     }
 }
